@@ -8,9 +8,8 @@ pub fn autorestart<T, F>(mut f: F)
         let ret = f();
 
         if let Err(err) = &ret {
-            match err.kind() {
-                ErrorKind::Interrupted => continue,
-                _ => (),
+            if let ErrorKind::Interrupted = err.kind() {
+                continue
             }
         }
 
