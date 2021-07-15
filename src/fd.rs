@@ -26,6 +26,10 @@ impl Drop for Fd {
     }
 }
 impl Fd {
+    pub const unsafe fn new(raw_fd: RawFd) -> Fd {
+        Fd { inner: raw_fd }
+    }
+
     pub fn read(&self, buf: &mut [u8]) -> Result<usize> {
         let buf_ptr = buf.as_mut_ptr() as *mut c_void;
         let buf_len = buf.len() as libc::size_t;
