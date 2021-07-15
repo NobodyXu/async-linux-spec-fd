@@ -17,7 +17,7 @@ use crate::fd::Fd;
 
 // Here it relies on the compiler to check that i32 == c_int
 #[repr(i32)]
-#[derive(Copy, Clone, Debug, IntoPrimitive)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq, IntoPrimitive)]
 pub enum Signal {
     Sigalrm  = libc::SIGALRM,
     Sigchld  = libc::SIGCHLD,
