@@ -14,7 +14,6 @@ lto = 'thin'
 
 [dependencies]
 libc = "0.2"
-# For mod process, SignalFd
 tokio = { version = "1.7.1", features = ["net", "rt"] }
-# For mod SignalFd
 waitmap = "1.1.0"
+arrayvec = "0.7.1"
