@@ -91,6 +91,8 @@ impl SignalFd {
         }
     }
 
+    /// **NOTE that signals can be coalesced together unless the sender employs
+    /// `sigqueue` to send the signals.**
     pub async fn read(&self) -> Result<ArrayVec<signalfd_siginfo, 100>> {
         let mut siginfos = ArrayVec::new_const();
 
