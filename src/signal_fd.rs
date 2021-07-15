@@ -11,11 +11,13 @@ use tokio::io::Interest;
 
 pub use arrayvec::ArrayVec;
 
+use num_enum::IntoPrimitive;
+
 use crate::fd::Fd;
 
 // Here it relies on the compiler to check that i32 == c_int
 #[repr(i32)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, IntoPrimitive)]
 pub enum Signal {
     Sigalrm  = libc::SIGALRM,
     Sigchld  = libc::SIGCHLD,
@@ -50,7 +52,7 @@ impl SignalFd {
             if sigemptyset(mask.as_mut_ptr()) < 0 {
                 return Err(Error::last_os_error());
             }
-            if sigaddset(mask.as_mut_ptr(), signal as i32) < 0 {
+            if sigaddset(mask.as_mut_ptr(), signal.into()) < 0 {
                 return Err(Error::last_os_error());
             }
         };
