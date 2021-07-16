@@ -84,13 +84,20 @@ impl Reaper {
 
             // Continue to collect zombies whose SIGCHLD might get coalesced
             while let Some(siginfo) = waitid(P_ALL, 0, waitid_option)? {
+                let status = unsafe { siginfo.si_status() };
+                let code =
+                    if siginfo.si_code == libc::CLD_EXITED {
+                        ExitCode::Exited(status)
+                    } else {
+                        ExitCode::Killed(ChildTermSignal::try_from(status).unwrap())
+                    }
+                ;
+
                 reaper.map.insert(
                     Pid(unsafe { siginfo.si_pid() }),
                     ExitInfo {
                         uid: unsafe { siginfo.si_uid() },
-                        wstatus: unsafe { siginfo.si_status() },
-                        utime: unsafe { siginfo.si_utime() },
-                        stime: unsafe { siginfo.si_stime() }
+                        code,
                     }
                 );
             }
@@ -137,16 +144,19 @@ pub enum ChildTermSignal {
     Sigxfsz   = libc::SIGXFSZ,
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum ExitCode {
+    Killed(ChildTermSignal),
+    Exited(c_int),
+}
+
+// TODO: Reimpl ExitInfo based on man page of waitid
 #[derive(Copy, Clone, Debug)]
 pub struct ExitInfo {
     /// uid of the child when it exits
     uid: libc::uid_t,
-    /// exit status of the child
-    wstatus: c_int,
-    /// user time consumed
-    utime: libc::clock_t,
-    /// system time consumed
-    stime: libc::clock_t,
+    /// exit code of the child
+    code: ExitCode,
 }
 impl ExitInfo {
     /// uid of the process when it exits
@@ -154,34 +164,8 @@ impl ExitInfo {
         self.uid
     }
 
-    /// user time consumed by the process
-    pub fn get_utime(&self) -> libc::clock_t {
-        self.utime
-    }
-
-    /// system time consumed by the process
-    pub fn get_stime(&self) -> libc::clock_t {
-        self.stime
-    }
-
-    /// Get exit status if the child terminated normally instead of terminated
-    /// by signal
-    pub fn get_exit_status(&self) -> Option<c_int> {
-        if libc::WIFEXITED(self.wstatus) {
-            Some(libc::WEXITSTATUS(self.wstatus))
-        } else {
-            None
-        }
-    }
-
-    /// Get the signal that terminated the process if it is killed by signal
-    pub fn get_term_sig(&self) -> Option<ChildTermSignal> {
-        if libc::WIFSIGNALED(self.wstatus) {
-            // It will be an internal error if the platform reports that the signal
-            // is killed by signal not listed in ChildTermSignal
-            Some(ChildTermSignal::try_from(libc::WTERMSIG(self.wstatus)).unwrap())
-        } else {
-            None
-        }
+    /// exit code of the child
+    pub fn get_code(&self) -> ExitCode {
+        self.code
     }
 }
