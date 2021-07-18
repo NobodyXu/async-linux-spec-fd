@@ -141,6 +141,8 @@ pub struct ExitInfo {
     code: ExitCode,
 }
 impl ExitInfo {
+    /// # Safety
+    ///
     /// * `siginfo` - Must be retrieved via either `waitid` or `SignalFd` or handler
     ///   registered via `sigaction`.
     pub unsafe fn new(siginfo: siginfo_t) -> ExitInfo {
