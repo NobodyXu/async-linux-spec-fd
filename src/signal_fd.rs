@@ -11,20 +11,22 @@ use tokio::io::Interest;
 
 pub use arrayvec::ArrayVec;
 
-use num_enum::IntoPrimitive;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::fd::Fd;
 
 // Here it relies on the compiler to check that i32 == c_int
 #[repr(i32)]
-#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq, IntoPrimitive)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 pub enum Signal {
-    Sigalrm  = libc::SIGALRM,
+    Sigabrt   = libc::SIGABRT,
     Sigchld  = libc::SIGCHLD,
     Sigcont  = libc::SIGCONT,
     Sighup   = libc::SIGHUP,
     Sigint   = libc::SIGINT,
     Sigio    = libc::SIGIO,
+    Sigkill   = libc::SIGKILL,
+    Sigprof   = libc::SIGPROF,
     Sigpipe  = libc::SIGPIPE,
     Sigpwr   = libc::SIGPWR,
     Sigquit  = libc::SIGQUIT,
