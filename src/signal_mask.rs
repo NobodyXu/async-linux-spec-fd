@@ -1,5 +1,5 @@
 use std::io::{Result, Error};
-use libc::{sigset_t, SIG_BLOCK, sigemptyset, sigaddset, sigprocmask};
+use libc::{sigset_t, SIG_BLOCK, sigemptyset, sigfillset, sigaddset, sigprocmask};
 
 use crate::Signal;
 
@@ -20,6 +20,19 @@ impl SignalMask {
         let mut mask = std::mem::MaybeUninit::<sigset_t>::uninit();
 
         let ret = unsafe { sigemptyset(mask.as_mut_ptr()) };
+        if cfg!(debug_assertions) && ret < 0 {
+            let result: Result<()> = Err(Error::last_os_error());
+            result.unwrap();
+        }
+
+        Self { mask: unsafe { mask.assume_init() } }
+    }
+
+    /// Creates a full `SignalMask` contains every signal.
+    pub fn new_full() -> Self {
+        let mut mask = std::mem::MaybeUninit::<sigset_t>::uninit();
+
+        let ret = unsafe { sigfillset(mask.as_mut_ptr()) };
         if cfg!(debug_assertions) && ret < 0 {
             let result: Result<()> = Err(Error::last_os_error());
             result.unwrap();
