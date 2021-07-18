@@ -30,6 +30,9 @@ impl Fd {
         Fd { inner: raw_fd }
     }
 
+    /// Read at most `buf.len()` data into `buf`.
+    ///
+    /// Auto restart on interrpted.
     pub fn read(&self, buf: &mut [u8]) -> Result<usize> {
         let buf_ptr = buf.as_mut_ptr() as *mut c_void;
         let buf_len = buf.len() as libc::size_t;
