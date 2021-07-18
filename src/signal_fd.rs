@@ -20,6 +20,16 @@ pub struct SignalFd {
     inner: AsyncFd<Fd>,
 }
 impl SignalFd {
+    /// Returns a `SignalFd` that is close-on-exec.
+    ///
+    /// If you creates multiple `SignalFd`, then you will be able
+    /// to read signals sent to this process from any one of them.
+    ///
+    /// However, once you read them from one `SignalFd`, you won't 
+    /// be able to read it again from another `SignalFd`.
+    ///
+    /// After `SignalFd` is created, the corresponding signal will be
+    /// masked so that your signal handler won't receive them.
     pub fn new(signal: Signal) -> Result<Self> {
         let mut mask = std::mem::MaybeUninit::<sigset_t>::uninit();
         unsafe {
