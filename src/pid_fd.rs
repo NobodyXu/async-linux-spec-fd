@@ -144,7 +144,7 @@ impl ExitInfo {
     /// # Safety
     ///
     /// * `siginfo` - Must be retrieved via either `waitid` or `SignalFd` or handler
-    ///   registered via `sigaction`.
+    ///   registered via `sigaction` or via `sigwaitinfo`/`sigtimedwait`.
     pub unsafe fn new(siginfo: siginfo_t) -> ExitInfo {
         let status = siginfo.si_status();
         let code =
