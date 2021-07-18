@@ -4,7 +4,6 @@ use std::mem::size_of;
 pub use libc::signalfd_siginfo;
 
 use libc::{signalfd, SFD_CLOEXEC, SFD_NONBLOCK};
-use libc::{sigset_t, SIG_BLOCK, sigemptyset, sigaddset, sigprocmask};
 
 use tokio::io::unix::AsyncFd;
 use tokio::io::Interest;
@@ -12,7 +11,7 @@ use tokio::io::Interest;
 pub use arrayvec::ArrayVec;
 
 use crate::fd::Fd;
-use crate::Signal;
+use crate::SignalMask;
 
 /// Due to the fact that epoll on signalfd would fail after fork, you cannot reuse
 /// SignalFd after forked.
@@ -30,26 +29,11 @@ impl SignalFd {
     ///
     /// After `SignalFd` is created, the corresponding signal will be
     /// masked so that your signal handler won't receive them.
-    pub fn new(signal: Signal) -> Result<Self> {
-        let mut mask = std::mem::MaybeUninit::<sigset_t>::uninit();
-        unsafe {
-            if sigemptyset(mask.as_mut_ptr()) < 0 {
-                return Err(Error::last_os_error());
-            }
-            if sigaddset(mask.as_mut_ptr(), signal.into()) < 0 {
-                return Err(Error::last_os_error());
-            }
-        };
-        let mask = unsafe { mask.assume_init() };
-
-        if unsafe {
-            sigprocmask(SIG_BLOCK, &mask as *const _, std::ptr::null_mut())
-        } < 0 {
-            return Err(Error::last_os_error());
-        }
+    pub fn new(sigmask: SignalMask) -> Result<Self> {
+        sigmask.block()?;
 
         let fd = unsafe {
-            signalfd(-1, &mask as *const _, SFD_NONBLOCK | SFD_CLOEXEC)
+            signalfd(-1, sigmask.as_sigset(), SFD_NONBLOCK | SFD_CLOEXEC)
         };
         if fd < 0 {
             return Err(Error::last_os_error());
