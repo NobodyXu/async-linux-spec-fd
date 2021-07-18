@@ -53,6 +53,7 @@ impl SignalMask {
         }
     }
 
+    /// Remove `signal` from the mask.
     pub fn remove(&mut self, signal: Signal) -> Result<()> {
         if unsafe { sigdelset(&mut self.mask, signal.into()) } < 0 {
             Err(Error::last_os_error())
@@ -61,6 +62,7 @@ impl SignalMask {
         }
     }
 
+    /// Test if `signal` is in the mask.
     pub fn is_member(&self, signal: Signal) -> Result<bool> {
         let result = unsafe { sigismember(&self.mask, signal.into()) };
         if result < 0 {
@@ -81,10 +83,12 @@ impl SignalMask {
         }
     }
 
+    /// Retrieved the underlying `sigset_t`.
     pub fn as_sigset(&self) -> &sigset_t {
         &self.mask
     }
 
+    /// Retrieved the underlying `sigset_t`.
     pub fn as_sigset_mut(&mut self) -> &mut sigset_t {
         &mut self.mask
     }
