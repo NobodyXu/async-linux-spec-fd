@@ -14,7 +14,7 @@ mod pid_fd;
 
 pub use signal_fd::{Signal, SignalFd, ArrayVec};
 pub use children_reaper::{Reaper, ExitInfo, ChildTermSignal};
-pub use pid_fd::PidFd;
+pub use pid_fd::*;
 
 #[cfg(test)]
 mod tests {
