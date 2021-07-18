@@ -1,5 +1,7 @@
 use std::io::{Result, Error};
-use libc::{sigset_t, SIG_BLOCK, sigemptyset, sigfillset, sigaddset, sigprocmask};
+use libc::{
+    sigset_t, SIG_BLOCK, sigemptyset, sigfillset, sigaddset, sigdelset, sigprocmask
+};
 
 use crate::Signal;
 
@@ -44,6 +46,14 @@ impl SignalMask {
     /// Add `signal` to the mask.
     pub fn add(&mut self, signal: Signal) -> Result<()> {
         if unsafe { sigaddset(&mut self.mask, signal.into()) } < 0 {
+            Err(Error::last_os_error())
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn remove(&mut self, signal: Signal) -> Result<()> {
+        if unsafe { sigdelset(&mut self.mask, signal.into()) } < 0 {
             Err(Error::last_os_error())
         } else {
             Ok(())
