@@ -29,6 +29,14 @@ impl SignalFd {
     ///
     /// After `SignalFd` is created, the corresponding signal will be
     /// masked so that your signal handler won't receive them.
+    ///
+    ///  * `sigmask` - must not contain signals:
+    ///     - `SIGKILL`;
+    ///     - `SIGSTOP`;
+    ///     - `SIGBUS`;
+    ///     - `SIGFPE`;
+    ///     - `SIGILL`;
+    ///     - `SIGSEGV`
     pub fn new(sigmask: SignalMask) -> Result<Self> {
         sigmask.block()?;
 
