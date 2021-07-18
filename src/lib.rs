@@ -15,5 +15,5 @@ mod pid_fd;
 
 pub use signal::Signal;
 pub use signal_mask::SignalMask;
-pub use signal_fd::{SignalFd, ArrayVec};
+pub use signal_fd::*;
 pub use pid_fd::*;
