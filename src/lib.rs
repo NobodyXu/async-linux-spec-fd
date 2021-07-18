@@ -1,6 +1,5 @@
 extern crate libc;
 extern crate tokio;
-extern crate waitmap;
 extern crate arrayvec;
 extern crate num_enum;
 
