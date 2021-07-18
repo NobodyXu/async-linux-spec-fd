@@ -1,6 +1,7 @@
 use std::io::{Result, Error};
 use libc::{
-    sigset_t, SIG_BLOCK, sigemptyset, sigfillset, sigaddset, sigdelset, sigprocmask
+    sigset_t, SIG_BLOCK,
+    sigemptyset, sigfillset, sigaddset, sigdelset, sigismember, sigprocmask
 };
 
 use crate::Signal;
@@ -57,6 +58,15 @@ impl SignalMask {
             Err(Error::last_os_error())
         } else {
             Ok(())
+        }
+    }
+
+    pub fn is_member(&self, signal: Signal) -> Result<bool> {
+        let result = unsafe { sigismember(&self.mask, signal.into()) };
+        if result < 0 {
+            Err(Error::last_os_error())
+        } else {
+            Ok(result != 0)
         }
     }
 
