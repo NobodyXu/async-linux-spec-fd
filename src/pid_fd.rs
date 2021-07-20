@@ -32,6 +32,29 @@ fn waitid(idtype: libc::idtype_t, id: libc::id_t, options: c_int)
     }
 }
 
+/// # Example
+///
+/// ```
+/// use libc::fork;
+/// use async_linux_spec_fd::*;
+///
+/// #[tokio::main(flavor = "current_thread")]
+/// async fn f() {
+///     let pid = unsafe { fork() };
+///     assert!(pid >= 0);
+///     if pid != 0 { // parent
+///         let pidfd = PidFd::open(pid).unwrap();
+///         let exitinfo = pidfd.waitpid().await.unwrap();
+///
+///         match exitinfo.get_code() {
+///             ExitCode::Killed(_) => panic!("Children killed by signal!"),
+///             ExitCode::Exited(code) => assert_eq!(code, 0),
+///         }
+///     }
+/// }
+///
+/// f();
+/// ```
 pub struct PidFd {
     inner: Fd
 }
