@@ -13,6 +13,8 @@ pub use arrayvec::ArrayVec;
 use crate::fd::Fd;
 use crate::SignalMask;
 
+/// `SignalFd` for async way of accepting signals.
+///
 /// Due to the fact that epoll on signalfd would fail after fork, you cannot reuse
 /// SignalFd after forked.
 ///
