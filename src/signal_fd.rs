@@ -15,6 +15,50 @@ use crate::SignalMask;
 
 /// Due to the fact that epoll on signalfd would fail after fork, you cannot reuse
 /// SignalFd after forked.
+///
+/// # Example
+///
+/// ```
+/// use std::sync::Arc;
+/// use std::sync::atomic::{AtomicBool, Ordering};
+/// use libc::{kill, getpid};
+/// use async_linux_spec_fd::*;
+///
+/// #[tokio::main(flavor = "current_thread")]
+/// async fn f() {
+///     let signalfd = SignalFd::new({
+///         let mut signal_mask = SignalMask::new();
+///         signal_mask.add(Signal::Sigusr1);
+///         signal_mask
+///     }).unwrap();
+///
+///     let need_to_stop = Arc::new(AtomicBool::new(false));
+///
+///     let need_to_stop_cloned = need_to_stop.clone();
+///     std::thread::spawn(move || {
+///         let pid = unsafe { getpid() };
+///
+///         let need_to_stop = need_to_stop_cloned;
+///
+///         while !need_to_stop.load(Ordering::Relaxed) {
+///             assert_eq!(0, unsafe { kill(pid, Signal::Sigusr1.into()) });
+///         }
+///     });
+///
+///     let mut cnt = 0;
+///
+///     while cnt < 1000 {
+///         for siginfo in signalfd.read().await.unwrap() {
+///             assert_eq!(siginfo.ssi_signo as i32, Signal::Sigusr1.into());
+///             cnt += 1;
+///         }
+///     }
+///
+///     need_to_stop.store(true, Ordering::Relaxed);
+/// }
+///
+/// f();
+/// ```
 pub struct SignalFd {
     inner: AsyncFd<Fd>,
 }
