@@ -21,6 +21,6 @@ lto = 'thin'
 
 [dependencies]
 libc = "0.2"
-tokio = { version = "1.7.1", features = ["net", "rt", "macros"] }
-arrayvec = "0.7.1"
-num_enum = "0.5.2"
+tokio = { version = "1.7", features = ["net", "rt", "macros"] }
+arrayvec = "0.7"
+num_enum = "0.5"
