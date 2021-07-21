@@ -1,6 +1,6 @@
 [package]
 name = "async_linux_spec_fd"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Jiahao XU <Jiahao_XU@outlook.com>"]
 edition = "2018"
 
