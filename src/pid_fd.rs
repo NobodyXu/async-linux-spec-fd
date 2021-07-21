@@ -32,6 +32,9 @@ fn waitid(idtype: libc::idtype_t, id: libc::id_t, options: c_int)
     }
 }
 
+/// `PidFd` for async and efficient method of reaping children process and
+/// race-free signal sending.
+///
 /// # Example
 ///
 /// ```
